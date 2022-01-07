@@ -1,6 +1,5 @@
-# GoDiscordBot Template
-GoDiscordBot is a Discord bot template repository that helps you quickly get started builing a Discord bot in go.
-
+# RaunchBot
+RaunchBot brings you the latest Raunchy content straight to your favorite Discord server. 
 
 ## Development:
 1. Compile and run the project.
