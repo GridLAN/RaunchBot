@@ -1,4 +1,4 @@
-module foodbot
+module raunchbot
 
 go 1.17
 
