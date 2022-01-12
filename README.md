@@ -8,7 +8,7 @@ Bot Commands:
 /reddit - random post from random subreddit
 /reddit add - add subreddit to []subreddits{}
 /reddit remove - remove subreddit from []subreddits{}
-/subreddit <subreddit> - random post from <subreddit> (command should populate based on []subredddits{})
+/subreddit <subreddit> - random post from <subreddit>
 ```
 
 ## Development:
