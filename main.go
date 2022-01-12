@@ -1,9 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"math/rand"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -15,9 +19,385 @@ import (
 // Bot parameters
 var (
 	GuildID        = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
-	BotToken       = flag.String("token", "", "Bot access token")
+	BotToken       = os.Getenv("TOKEN")
 	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
 )
+
+type RedditPost []struct {
+	Kind string `json:"kind"`
+	Data struct {
+		After     interface{} `json:"after"`
+		Dist      int         `json:"dist"`
+		Modhash   string      `json:"modhash"`
+		GeoFilter string      `json:"geo_filter"`
+		Children  []struct {
+			Kind string `json:"kind"`
+			Data struct {
+				ApprovedAtUtc              interface{}   `json:"approved_at_utc"`
+				Subreddit                  string        `json:"subreddit"`
+				Selftext                   string        `json:"selftext"`
+				AuthorFullname             string        `json:"author_fullname"`
+				Saved                      bool          `json:"saved"`
+				ModReasonTitle             interface{}   `json:"mod_reason_title"`
+				Gilded                     int           `json:"gilded"`
+				Clicked                    bool          `json:"clicked"`
+				Title                      string        `json:"title"`
+				LinkFlairRichtext          []interface{} `json:"link_flair_richtext"`
+				SubredditNamePrefixed      string        `json:"subreddit_name_prefixed"`
+				Hidden                     bool          `json:"hidden"`
+				Pwls                       int           `json:"pwls"`
+				LinkFlairCSSClass          interface{}   `json:"link_flair_css_class"`
+				Downs                      int           `json:"downs"`
+				ThumbnailHeight            interface{}   `json:"thumbnail_height"`
+				TopAwardedType             interface{}   `json:"top_awarded_type"`
+				ParentWhitelistStatus      string        `json:"parent_whitelist_status"`
+				HideScore                  bool          `json:"hide_score"`
+				Name                       string        `json:"name"`
+				Quarantine                 bool          `json:"quarantine"`
+				LinkFlairTextColor         string        `json:"link_flair_text_color"`
+				UpvoteRatio                float64       `json:"upvote_ratio"`
+				AuthorFlairBackgroundColor interface{}   `json:"author_flair_background_color"`
+				SubredditType              string        `json:"subreddit_type"`
+				Ups                        int           `json:"ups"`
+				TotalAwardsReceived        int           `json:"total_awards_received"`
+				MediaEmbed                 struct {
+				} `json:"media_embed"`
+				ThumbnailWidth        interface{}   `json:"thumbnail_width"`
+				AuthorFlairTemplateID interface{}   `json:"author_flair_template_id"`
+				IsOriginalContent     bool          `json:"is_original_content"`
+				UserReports           []interface{} `json:"user_reports"`
+				SecureMedia           interface{}   `json:"secure_media"`
+				IsRedditMediaDomain   bool          `json:"is_reddit_media_domain"`
+				IsMeta                bool          `json:"is_meta"`
+				Category              interface{}   `json:"category"`
+				SecureMediaEmbed      struct {
+				} `json:"secure_media_embed"`
+				LinkFlairText       interface{}   `json:"link_flair_text"`
+				CanModPost          bool          `json:"can_mod_post"`
+				Score               int           `json:"score"`
+				ApprovedBy          interface{}   `json:"approved_by"`
+				IsCreatedFromAdsUI  bool          `json:"is_created_from_ads_ui"`
+				AuthorPremium       bool          `json:"author_premium"`
+				Thumbnail           string        `json:"thumbnail"`
+				Edited              bool          `json:"edited"`
+				AuthorFlairCSSClass interface{}   `json:"author_flair_css_class"`
+				AuthorFlairRichtext []interface{} `json:"author_flair_richtext"`
+				Gildings            struct {
+				} `json:"gildings"`
+				ContentCategories   interface{} `json:"content_categories"`
+				IsSelf              bool        `json:"is_self"`
+				ModNote             interface{} `json:"mod_note"`
+				CrosspostParentList []struct {
+					ApprovedAtUtc              interface{}   `json:"approved_at_utc"`
+					Subreddit                  string        `json:"subreddit"`
+					Selftext                   string        `json:"selftext"`
+					UserReports                []interface{} `json:"user_reports"`
+					Saved                      bool          `json:"saved"`
+					ModReasonTitle             interface{}   `json:"mod_reason_title"`
+					Gilded                     int           `json:"gilded"`
+					Clicked                    bool          `json:"clicked"`
+					Title                      string        `json:"title"`
+					LinkFlairRichtext          []interface{} `json:"link_flair_richtext"`
+					SubredditNamePrefixed      string        `json:"subreddit_name_prefixed"`
+					Hidden                     bool          `json:"hidden"`
+					Pwls                       int           `json:"pwls"`
+					LinkFlairCSSClass          interface{}   `json:"link_flair_css_class"`
+					Downs                      int           `json:"downs"`
+					ThumbnailHeight            interface{}   `json:"thumbnail_height"`
+					TopAwardedType             interface{}   `json:"top_awarded_type"`
+					ParentWhitelistStatus      string        `json:"parent_whitelist_status"`
+					HideScore                  bool          `json:"hide_score"`
+					Name                       string        `json:"name"`
+					Quarantine                 bool          `json:"quarantine"`
+					LinkFlairTextColor         string        `json:"link_flair_text_color"`
+					UpvoteRatio                float64       `json:"upvote_ratio"`
+					AuthorFlairBackgroundColor interface{}   `json:"author_flair_background_color"`
+					SubredditType              string        `json:"subreddit_type"`
+					Ups                        int           `json:"ups"`
+					TotalAwardsReceived        int           `json:"total_awards_received"`
+					MediaEmbed                 struct {
+					} `json:"media_embed"`
+					ThumbnailWidth        interface{} `json:"thumbnail_width"`
+					AuthorFlairTemplateID interface{} `json:"author_flair_template_id"`
+					IsOriginalContent     bool        `json:"is_original_content"`
+					AuthorFullname        string      `json:"author_fullname"`
+					SecureMedia           interface{} `json:"secure_media"`
+					IsRedditMediaDomain   bool        `json:"is_reddit_media_domain"`
+					IsMeta                bool        `json:"is_meta"`
+					Category              interface{} `json:"category"`
+					SecureMediaEmbed      struct {
+					} `json:"secure_media_embed"`
+					LinkFlairText       interface{}   `json:"link_flair_text"`
+					CanModPost          bool          `json:"can_mod_post"`
+					Score               int           `json:"score"`
+					ApprovedBy          interface{}   `json:"approved_by"`
+					IsCreatedFromAdsUI  bool          `json:"is_created_from_ads_ui"`
+					AuthorPremium       bool          `json:"author_premium"`
+					Thumbnail           string        `json:"thumbnail"`
+					Edited              bool          `json:"edited"`
+					AuthorFlairCSSClass interface{}   `json:"author_flair_css_class"`
+					AuthorFlairRichtext []interface{} `json:"author_flair_richtext"`
+					Gildings            struct {
+					} `json:"gildings"`
+					ContentCategories        interface{}   `json:"content_categories"`
+					IsSelf                   bool          `json:"is_self"`
+					ModNote                  interface{}   `json:"mod_note"`
+					Created                  float64       `json:"created"`
+					LinkFlairType            string        `json:"link_flair_type"`
+					Wls                      int           `json:"wls"`
+					RemovedByCategory        interface{}   `json:"removed_by_category"`
+					BannedBy                 interface{}   `json:"banned_by"`
+					AuthorFlairType          string        `json:"author_flair_type"`
+					Domain                   string        `json:"domain"`
+					AllowLiveComments        bool          `json:"allow_live_comments"`
+					SelftextHTML             string        `json:"selftext_html"`
+					Likes                    interface{}   `json:"likes"`
+					SuggestedSort            interface{}   `json:"suggested_sort"`
+					BannedAtUtc              interface{}   `json:"banned_at_utc"`
+					ViewCount                interface{}   `json:"view_count"`
+					Archived                 bool          `json:"archived"`
+					NoFollow                 bool          `json:"no_follow"`
+					IsCrosspostable          bool          `json:"is_crosspostable"`
+					Pinned                   bool          `json:"pinned"`
+					Over18                   bool          `json:"over_18"`
+					AllAwardings             []interface{} `json:"all_awardings"`
+					Awarders                 []interface{} `json:"awarders"`
+					MediaOnly                bool          `json:"media_only"`
+					CanGild                  bool          `json:"can_gild"`
+					Spoiler                  bool          `json:"spoiler"`
+					Locked                   bool          `json:"locked"`
+					AuthorFlairText          interface{}   `json:"author_flair_text"`
+					TreatmentTags            []interface{} `json:"treatment_tags"`
+					Visited                  bool          `json:"visited"`
+					RemovedBy                interface{}   `json:"removed_by"`
+					NumReports               interface{}   `json:"num_reports"`
+					Distinguished            interface{}   `json:"distinguished"`
+					SubredditID              string        `json:"subreddit_id"`
+					AuthorIsBlocked          bool          `json:"author_is_blocked"`
+					ModReasonBy              interface{}   `json:"mod_reason_by"`
+					RemovalReason            interface{}   `json:"removal_reason"`
+					LinkFlairBackgroundColor string        `json:"link_flair_background_color"`
+					ID                       string        `json:"id"`
+					IsRobotIndexable         bool          `json:"is_robot_indexable"`
+					ReportReasons            interface{}   `json:"report_reasons"`
+					Author                   string        `json:"author"`
+					DiscussionType           interface{}   `json:"discussion_type"`
+					NumComments              int           `json:"num_comments"`
+					SendReplies              bool          `json:"send_replies"`
+					Media                    interface{}   `json:"media"`
+					ContestMode              bool          `json:"contest_mode"`
+					AuthorPatreonFlair       bool          `json:"author_patreon_flair"`
+					AuthorFlairTextColor     interface{}   `json:"author_flair_text_color"`
+					Permalink                string        `json:"permalink"`
+					WhitelistStatus          string        `json:"whitelist_status"`
+					Stickied                 bool          `json:"stickied"`
+					URL                      string        `json:"url"`
+					SubredditSubscribers     int           `json:"subreddit_subscribers"`
+					CreatedUtc               float64       `json:"created_utc"`
+					NumCrossposts            int           `json:"num_crossposts"`
+					ModReports               []interface{} `json:"mod_reports"`
+					IsVideo                  bool          `json:"is_video"`
+				} `json:"crosspost_parent_list"`
+				Created                  float64       `json:"created"`
+				LinkFlairType            string        `json:"link_flair_type"`
+				Wls                      int           `json:"wls"`
+				RemovedByCategory        interface{}   `json:"removed_by_category"`
+				BannedBy                 interface{}   `json:"banned_by"`
+				AuthorFlairType          string        `json:"author_flair_type"`
+				Domain                   string        `json:"domain"`
+				AllowLiveComments        bool          `json:"allow_live_comments"`
+				SelftextHTML             interface{}   `json:"selftext_html"`
+				Likes                    interface{}   `json:"likes"`
+				SuggestedSort            interface{}   `json:"suggested_sort"`
+				BannedAtUtc              interface{}   `json:"banned_at_utc"`
+				URLOverriddenByDest      string        `json:"url_overridden_by_dest"`
+				ViewCount                interface{}   `json:"view_count"`
+				Archived                 bool          `json:"archived"`
+				NoFollow                 bool          `json:"no_follow"`
+				IsCrosspostable          bool          `json:"is_crosspostable"`
+				Pinned                   bool          `json:"pinned"`
+				Over18                   bool          `json:"over_18"`
+				AllAwardings             []interface{} `json:"all_awardings"`
+				Awarders                 []interface{} `json:"awarders"`
+				MediaOnly                bool          `json:"media_only"`
+				CanGild                  bool          `json:"can_gild"`
+				Spoiler                  bool          `json:"spoiler"`
+				Locked                   bool          `json:"locked"`
+				AuthorFlairText          interface{}   `json:"author_flair_text"`
+				TreatmentTags            []interface{} `json:"treatment_tags"`
+				Visited                  bool          `json:"visited"`
+				RemovedBy                interface{}   `json:"removed_by"`
+				NumReports               interface{}   `json:"num_reports"`
+				Distinguished            interface{}   `json:"distinguished"`
+				SubredditID              string        `json:"subreddit_id"`
+				AuthorIsBlocked          bool          `json:"author_is_blocked"`
+				ModReasonBy              interface{}   `json:"mod_reason_by"`
+				RemovalReason            interface{}   `json:"removal_reason"`
+				LinkFlairBackgroundColor string        `json:"link_flair_background_color"`
+				ID                       string        `json:"id"`
+				IsRobotIndexable         bool          `json:"is_robot_indexable"`
+				NumDuplicates            int           `json:"num_duplicates"`
+				ReportReasons            interface{}   `json:"report_reasons"`
+				Author                   string        `json:"author"`
+				DiscussionType           interface{}   `json:"discussion_type"`
+				NumComments              int           `json:"num_comments"`
+				SendReplies              bool          `json:"send_replies"`
+				Media                    interface{}   `json:"media"`
+				ContestMode              bool          `json:"contest_mode"`
+				AuthorPatreonFlair       bool          `json:"author_patreon_flair"`
+				CrosspostParent          string        `json:"crosspost_parent"`
+				AuthorFlairTextColor     interface{}   `json:"author_flair_text_color"`
+				Permalink                string        `json:"permalink"`
+				WhitelistStatus          string        `json:"whitelist_status"`
+				Stickied                 bool          `json:"stickied"`
+				URL                      string        `json:"url"`
+				SubredditSubscribers     int           `json:"subreddit_subscribers"`
+				CreatedUtc               float64       `json:"created_utc"`
+				NumCrossposts            int           `json:"num_crossposts"`
+				ModReports               []interface{} `json:"mod_reports"`
+				IsVideo                  bool          `json:"is_video"`
+			} `json:"data"`
+		} `json:"children"`
+		Before interface{} `json:"before"`
+	} `json:"data"`
+}
+
+type Subreddit struct {
+	Kind string `json:"kind"`
+	Data struct {
+		UserFlairBackgroundColor       interface{}   `json:"user_flair_background_color"`
+		SubmitTextHTML                 string        `json:"submit_text_html"`
+		RestrictPosting                bool          `json:"restrict_posting"`
+		UserIsBanned                   interface{}   `json:"user_is_banned"`
+		FreeFormReports                bool          `json:"free_form_reports"`
+		WikiEnabled                    bool          `json:"wiki_enabled"`
+		UserIsMuted                    interface{}   `json:"user_is_muted"`
+		UserCanFlairInSr               interface{}   `json:"user_can_flair_in_sr"`
+		DisplayName                    string        `json:"display_name"`
+		HeaderImg                      string        `json:"header_img"`
+		Title                          string        `json:"title"`
+		AllowGalleries                 bool          `json:"allow_galleries"`
+		IconSize                       []int         `json:"icon_size"`
+		PrimaryColor                   string        `json:"primary_color"`
+		ActiveUserCount                int           `json:"active_user_count"`
+		IconImg                        string        `json:"icon_img"`
+		DisplayNamePrefixed            string        `json:"display_name_prefixed"`
+		AccountsActive                 int           `json:"accounts_active"`
+		PublicTraffic                  bool          `json:"public_traffic"`
+		Subscribers                    int           `json:"subscribers"`
+		UserFlairRichtext              []interface{} `json:"user_flair_richtext"`
+		VideostreamLinksCount          int           `json:"videostream_links_count"`
+		Name                           string        `json:"name"`
+		Quarantine                     bool          `json:"quarantine"`
+		HideAds                        bool          `json:"hide_ads"`
+		PredictionLeaderboardEntryType string        `json:"prediction_leaderboard_entry_type"`
+		EmojisEnabled                  bool          `json:"emojis_enabled"`
+		AdvertiserCategory             string        `json:"advertiser_category"`
+		PublicDescription              string        `json:"public_description"`
+		CommentScoreHideMins           int           `json:"comment_score_hide_mins"`
+		AllowPredictions               bool          `json:"allow_predictions"`
+		UserHasFavorited               interface{}   `json:"user_has_favorited"`
+		UserFlairTemplateID            interface{}   `json:"user_flair_template_id"`
+		CommunityIcon                  string        `json:"community_icon"`
+		BannerBackgroundImage          string        `json:"banner_background_image"`
+		OriginalContentTagEnabled      bool          `json:"original_content_tag_enabled"`
+		CommunityReviewed              bool          `json:"community_reviewed"`
+		SubmitText                     string        `json:"submit_text"`
+		DescriptionHTML                string        `json:"description_html"`
+		SpoilersEnabled                bool          `json:"spoilers_enabled"`
+		HeaderTitle                    string        `json:"header_title"`
+		HeaderSize                     []int         `json:"header_size"`
+		UserFlairPosition              string        `json:"user_flair_position"`
+		AllOriginalContent             bool          `json:"all_original_content"`
+		HasMenuWidget                  bool          `json:"has_menu_widget"`
+		IsEnrolledInNewModmail         interface{}   `json:"is_enrolled_in_new_modmail"`
+		KeyColor                       string        `json:"key_color"`
+		CanAssignUserFlair             bool          `json:"can_assign_user_flair"`
+		Created                        int           `json:"created"`
+		Wls                            int           `json:"wls"`
+		ShowMediaPreview               bool          `json:"show_media_preview"`
+		SubmissionType                 string        `json:"submission_type"`
+		UserIsSubscriber               interface{}   `json:"user_is_subscriber"`
+		DisableContributorRequests     bool          `json:"disable_contributor_requests"`
+		AllowVideogifs                 bool          `json:"allow_videogifs"`
+		ShouldArchivePosts             bool          `json:"should_archive_posts"`
+		UserFlairType                  string        `json:"user_flair_type"`
+		AllowPolls                     bool          `json:"allow_polls"`
+		CollapseDeletedComments        bool          `json:"collapse_deleted_comments"`
+		EmojisCustomSize               interface{}   `json:"emojis_custom_size"`
+		PublicDescriptionHTML          string        `json:"public_description_html"`
+		AllowVideos                    bool          `json:"allow_videos"`
+		IsCrosspostableSubreddit       bool          `json:"is_crosspostable_subreddit"`
+		NotificationLevel              interface{}   `json:"notification_level"`
+		CanAssignLinkFlair             bool          `json:"can_assign_link_flair"`
+		AccountsActiveIsFuzzed         bool          `json:"accounts_active_is_fuzzed"`
+		AllowPredictionContributors    bool          `json:"allow_prediction_contributors"`
+		SubmitTextLabel                string        `json:"submit_text_label"`
+		LinkFlairPosition              string        `json:"link_flair_position"`
+		UserSrFlairEnabled             interface{}   `json:"user_sr_flair_enabled"`
+		UserFlairEnabledInSr           bool          `json:"user_flair_enabled_in_sr"`
+		AllowDiscovery                 bool          `json:"allow_discovery"`
+		AcceptFollowers                bool          `json:"accept_followers"`
+		UserSrThemeEnabled             bool          `json:"user_sr_theme_enabled"`
+		LinkFlairEnabled               bool          `json:"link_flair_enabled"`
+		SubredditType                  string        `json:"subreddit_type"`
+		SuggestedCommentSort           interface{}   `json:"suggested_comment_sort"`
+		BannerImg                      string        `json:"banner_img"`
+		UserFlairText                  interface{}   `json:"user_flair_text"`
+		BannerBackgroundColor          string        `json:"banner_background_color"`
+		ShowMedia                      bool          `json:"show_media"`
+		ID                             string        `json:"id"`
+		UserIsModerator                interface{}   `json:"user_is_moderator"`
+		Over18                         bool          `json:"over18"`
+		Description                    string        `json:"description"`
+		SubmitLinkLabel                string        `json:"submit_link_label"`
+		UserFlairTextColor             interface{}   `json:"user_flair_text_color"`
+		RestrictCommenting             bool          `json:"restrict_commenting"`
+		UserFlairCSSClass              interface{}   `json:"user_flair_css_class"`
+		AllowImages                    bool          `json:"allow_images"`
+		Lang                           string        `json:"lang"`
+		WhitelistStatus                string        `json:"whitelist_status"`
+		URL                            string        `json:"url"`
+		CreatedUtc                     int           `json:"created_utc"`
+		BannerSize                     []int         `json:"banner_size"`
+		MobileBannerImage              string        `json:"mobile_banner_image"`
+		UserIsContributor              interface{}   `json:"user_is_contributor"`
+		AllowPredictionsTournament     bool          `json:"allow_predictions_tournament"`
+	} `json:"data"`
+}
+
+var subreddits = []string{}
+
+func getJson(url string, target interface{}) error {
+	// Create a new HTTP client with a timeout of 10 seconds
+	var myClient = http.Client{Timeout: 10 * time.Second}
+
+	// Build a GET request to the meal API endpoint
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Add the required headers to the request
+	req.Header.Set("User-Agent", "RaunchBot")
+
+	// Send the request and store the response
+	r, getErr := myClient.Do(req)
+	if getErr != nil {
+		log.Fatal(getErr)
+	}
+
+	// Close the response body when done
+	defer r.Body.Close()
+
+	// Read the response body
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return json.Unmarshal(b, target)
+}
 
 var s *discordgo.Session
 
@@ -25,7 +405,11 @@ func init() { flag.Parse() }
 
 func init() {
 	var err error
-	s, err = discordgo.New("Bot " + *BotToken)
+	if BotToken == "" {
+		log.Fatal("Token cannot be empty")
+	}
+
+	s, err = discordgo.New("Bot " + BotToken)
 	if err != nil {
 		log.Fatalf("Invalid bot parameters: %v", err)
 	}
@@ -34,320 +418,168 @@ func init() {
 var (
 	commands = []*discordgo.ApplicationCommand{
 		{
-			Name: "basic-command",
-			// All commands and options must have a description
-			// Commands/options without description will fail the registration
-			// of the command.
-			Description: "Basic command",
+			Name:        "reddit",
+			Description: "random post from a random subreddit",
 		},
 		{
-			Name:        "basic-command-with-files",
-			Description: "Basic command with files",
-		},
-		{
-			Name:        "options",
-			Description: "Command for demonstrating options",
+			Name:        "reddit-add",
+			Description: "add a subreddit to the list of available subreddits",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "string-option",
-					Description: "String option",
+					Name:        "subreddit",
+					Description: "enter subreddit name",
 					Required:    true,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionInteger,
-					Name:        "integer-option",
-					Description: "Integer option",
-					Required:    true,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionBoolean,
-					Name:        "bool-option",
-					Description: "Boolean option",
-					Required:    true,
-				},
-
-				// Required options must be listed first since optional parameters
-				// always come after when they're used.
-				// The same concept applies to Discord's Slash-commands API
-
-				{
-					Type:        discordgo.ApplicationCommandOptionChannel,
-					Name:        "channel-option",
-					Description: "Channel option",
-					// Channel type mask
-					ChannelTypes: []discordgo.ChannelType{
-						discordgo.ChannelTypeGuildText,
-						discordgo.ChannelTypeGuildVoice,
-					},
-					Required: false,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionUser,
-					Name:        "user-option",
-					Description: "User option",
-					Required:    false,
-				},
-				{
-					Type:        discordgo.ApplicationCommandOptionRole,
-					Name:        "role-option",
-					Description: "Role option",
-					Required:    false,
 				},
 			},
 		},
 		{
-			Name:        "subcommands",
-			Description: "Subcommands and command groups example",
+			Name:        "reddit-list",
+			Description: "list of available subreddits",
+			Options:     []*discordgo.ApplicationCommandOption{},
+		},
+		{
+			Name:        "reddit-remove",
+			Description: "remove a subreddit to the list of available subreddits",
 			Options: []*discordgo.ApplicationCommandOption{
-				// When a command has subcommands/subcommand groups
-				// It must not have top-level options, they aren't accesible in the UI
-				// in this case (at least not yet), so if a command has
-				// subcommands/subcommand any groups registering top-level options
-				// will cause the registration of the command to fail
 
 				{
-					Name:        "scmd-grp",
-					Description: "Subcommands group",
-					Options: []*discordgo.ApplicationCommandOption{
-						// Also, subcommand groups aren't capable of
-						// containing options, by the name of them, you can see
-						// they can only contain subcommands
-						{
-							Name:        "nst-subcmd",
-							Description: "Nested subcommand",
-							Type:        discordgo.ApplicationCommandOptionSubCommand,
-						},
-					},
-					Type: discordgo.ApplicationCommandOptionSubCommandGroup,
-				},
-				// Also, you can create both subcommand groups and subcommands
-				// in the command at the same time. But, there's some limits to
-				// nesting, count of subcommands (top level and nested) and options.
-				// Read the intro of slash-commands docs on Discord dev portal
-				// to get more information
-				{
-					Name:        "subcmd",
-					Description: "Top-level subcommand",
-					Type:        discordgo.ApplicationCommandOptionSubCommand,
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "subreddit",
+					Description: "enter subreddit name",
+					Required:    true,
 				},
 			},
 		},
 		{
-			Name:        "responses",
-			Description: "Interaction responses testing initiative",
+			Name:        "subreddit",
+			Description: "random post from a specific subreddit",
 			Options: []*discordgo.ApplicationCommandOption{
+
 				{
-					Name:        "resp-type",
-					Description: "Response type",
-					Type:        discordgo.ApplicationCommandOptionInteger,
-					Choices: []*discordgo.ApplicationCommandOptionChoice{
-						{
-							Name:  "Channel message with source",
-							Value: 4,
-						},
-						{
-							Name:  "Deferred response With Source",
-							Value: 5,
-						},
-					},
-					Required: true,
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "subreddit",
+					Description: "enter subreddit name",
+					Required:    true,
 				},
 			},
-		},
-		{
-			Name:        "followups",
-			Description: "Followup messages",
 		},
 	}
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"basic-command": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"reddit": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			var msg string
+			// If the []subreddits is empty, it will return an error
+			if len(subreddits) == 0 {
+				msg = "There are no subreddits in the list to choose from."
+			} else {
+
+				// Seed the random number generator & get a random index from the slice
+				rand.Seed(time.Now().UnixNano())
+				randIndex := rand.Intn(len(subreddits))
+
+				// Query the API for a random post from a random subreddit
+				randomRedditPost := RedditPost{}
+				getJson("https://reddit.com/r/"+subreddits[randIndex]+"/random.json", &randomRedditPost)
+
+				msg = fmt.Sprintf(randomRedditPost[0].Data.Children[0].Data.Title) + " " + randomRedditPost[0].Data.Children[0].Data.URL
+			}
+			// Respond with the post's title and URL
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Hey there! Congratulations, you just executed your first slash command",
+					Content: msg,
 				},
 			})
 		},
-		"basic-command-with-files": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"reddit-add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			// Query user for subreddit name
+			subreddit := i.ApplicationCommandData().Options[0].StringValue()
+
+			// Setup the response data
+			var msg string
+
+			subredditCheck := Subreddit{}
+			getJson("https://reddit.com/r/"+subreddit+"/about.json", &subredditCheck)
+
+			// If the subreddit exists, add it to the slice
+			if subredditCheck.Data.URL == "" {
+				msg = "The subreddit " + subreddit + " was not found. Try again."
+			} else {
+				subreddits = append(subreddits, subreddit)
+				msg = subreddit + " has been added to the list."
+			}
+
+			// Respond with the message
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: "Hey there! Congratulations, you just executed your first slash command with a file in the response",
-					Files: []*discordgo.File{
-						{
-							ContentType: "text/plain",
-							Name:        "test.txt",
-							Reader:      strings.NewReader("Hello Discord!!"),
-						},
-					},
+					Content: msg,
 				},
 			})
-		},
-		"options": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			margs := []interface{}{
-				// Here we need to convert raw interface{} value to wanted type.
-				// Also, as you can see, here is used utility functions to convert the value
-				// to particular type. Yeah, you can use just switch type,
-				// but this is much simpler
-				i.ApplicationCommandData().Options[0].StringValue(),
-				i.ApplicationCommandData().Options[1].IntValue(),
-				i.ApplicationCommandData().Options[2].BoolValue(),
-			}
-			msgformat :=
-				` Now you just learned how to use command options. Take a look to the value of which you've just entered:
-				> string_option: %s
-				> integer_option: %d
-				> bool_option: %v
-`
-			if len(i.ApplicationCommandData().Options) >= 4 {
-				margs = append(margs, i.ApplicationCommandData().Options[3].ChannelValue(nil).ID)
-				msgformat += "> channel-option: <#%s>\n"
-			}
-			if len(i.ApplicationCommandData().Options) >= 5 {
-				margs = append(margs, i.ApplicationCommandData().Options[4].UserValue(nil).ID)
-				msgformat += "> user-option: <@%s>\n"
-			}
-			if len(i.ApplicationCommandData().Options) >= 6 {
-				margs = append(margs, i.ApplicationCommandData().Options[5].RoleValue(nil, "").ID)
-				msgformat += "> role-option: <@&%s>\n"
-			}
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				// Ignore type for now, we'll discuss them in "responses" part
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(
-						msgformat,
-						margs...,
-					),
-				},
-			})
-		},
-		"subcommands": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			content := ""
 
-			// As you can see, the name of subcommand (nested, top-level) or subcommand group
-			// is provided through arguments.
-			switch i.ApplicationCommandData().Options[0].Name {
-			case "subcmd":
-				content =
-					"The top-level subcommand is executed. Now try to execute the nested one."
-			default:
-				if i.ApplicationCommandData().Options[0].Name != "scmd-grp" {
-					return
-				}
-				switch i.ApplicationCommandData().Options[0].Options[0].Name {
-				case "nst-subcmd":
-					content = "Nice, now you know how to execute nested commands too"
-				default:
-					// I added this in the case something might go wrong
-					content = "Oops, something gone wrong.\n" +
-						"Hol' up, you aren't supposed to see this message."
-				}
-			}
+		},
+		"reddit-list": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			msg := "The following subreddits are available:\n" + "```" + strings.Join(subreddits, "\n") + "```"
+
+			// Respond with the message
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: content,
+					Content: msg,
 				},
 			})
 		},
-		"responses": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			// Responses to a command are very important.
-			// First of all, because you need to react to the interaction
-			// by sending the response in 3 seconds after receiving, otherwise
-			// interaction will be considered invalid and you can no longer
-			// use the interaction token and ID for responding to the user's request
+		"reddit-remove": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			// Query user for subreddit name
+			subreddit := i.ApplicationCommandData().Options[0].StringValue()
 
-			content := ""
-			// As you can see, the response type names used here are pretty self-explanatory,
-			// but for those who want more information see the official documentation
-			switch i.ApplicationCommandData().Options[0].IntValue() {
-			case int64(discordgo.InteractionResponseChannelMessageWithSource):
-				content =
-					"You just responded to an interaction, sent a message and showed the original one. " +
-						"Congratulations!"
-				content +=
-					"\nAlso... you can edit your response, wait 5 seconds and this message will be changed"
-			default:
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-					Type: discordgo.InteractionResponseType(i.ApplicationCommandData().Options[0].IntValue()),
-				})
-				if err != nil {
-					s.FollowupMessageCreate(s.State.User.ID, i.Interaction, true, &discordgo.WebhookParams{
-						Content: "Something went wrong",
-					})
-				}
-				return
+			// Setup the response data
+			var msg string
+
+			// If subreddit is not in []subreddits, return error
+			if !contains(subreddits, subreddit) {
+				msg = subreddit + " is not in the list."
+			} else {
+				// Remove subreddit from []subreddits
+				subreddits = remove(subreddits, subreddit)
+				msg = subreddit + " has been removed from the list."
 			}
 
-			err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseType(i.ApplicationCommandData().Options[0].IntValue()),
-				Data: &discordgo.InteractionResponseData{
-					Content: content,
-				},
-			})
-			if err != nil {
-				s.FollowupMessageCreate(s.State.User.ID, i.Interaction, true, &discordgo.WebhookParams{
-					Content: "Something went wrong",
-				})
-				return
-			}
-			time.AfterFunc(time.Second*5, func() {
-				_, err = s.InteractionResponseEdit(s.State.User.ID, i.Interaction, &discordgo.WebhookEdit{
-					Content: content + "\n\nWell, now you know how to create and edit responses. " +
-						"But you still don't know how to delete them... so... wait 10 seconds and this " +
-						"message will be deleted.",
-				})
-				if err != nil {
-					s.FollowupMessageCreate(s.State.User.ID, i.Interaction, true, &discordgo.WebhookParams{
-						Content: "Something went wrong",
-					})
-					return
-				}
-				time.Sleep(time.Second * 10)
-				s.InteractionResponseDelete(s.State.User.ID, i.Interaction)
-			})
-		},
-		"followups": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			// Followup messages are basically regular messages (you can create as many of them as you wish)
-			// but work as they are created by webhooks and their functionality
-			// is for handling additional messages after sending a response.
-
+			// Respond with the message
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					// Note: this isn't documented, but you can use that if you want to.
-					// This flag just allows you to create messages visible only for the caller of the command
-					// (user who triggered the command)
-					Flags:   1 << 6,
-					Content: "Surprise!",
+					Content: msg,
 				},
 			})
-			msg, err := s.FollowupMessageCreate(s.State.User.ID, i.Interaction, true, &discordgo.WebhookParams{
-				Content: "Followup message has been created, after 5 seconds it will be edited",
-			})
-			if err != nil {
-				s.FollowupMessageCreate(s.State.User.ID, i.Interaction, true, &discordgo.WebhookParams{
-					Content: "Something went wrong",
-				})
-				return
+		},
+		"subreddit": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			// Query user for subreddit name
+			subreddit := i.ApplicationCommandData().Options[0].StringValue()
+
+			var msg string
+			// If the []subreddits is empty, it will return an error
+			if len(subreddits) == 0 {
+				msg = "There are no subreddits in the list to choose from."
 			}
-			time.Sleep(time.Second * 5)
+			// If subreddit is not in []subreddits, return error
+			if !contains(subreddits, subreddit) {
+				msg = subreddit + " is not in the list."
+			} else {
 
-			s.FollowupMessageEdit(s.State.User.ID, i.Interaction, msg.ID, &discordgo.WebhookEdit{
-				Content: "Now the original message is gone and after 10 seconds this message will ~~self-destruct~~ be deleted.",
-			})
+				// Query the API for a random post from a random subreddit
+				randomRedditPost := RedditPost{}
+				getJson("https://reddit.com/r/"+subreddit+"/random.json", &randomRedditPost)
 
-			time.Sleep(time.Second * 10)
-
-			s.FollowupMessageDelete(s.State.User.ID, i.Interaction, msg.ID)
-
-			s.FollowupMessageCreate(s.State.User.ID, i.Interaction, true, &discordgo.WebhookParams{
-				Content: "For those, who didn't skip anything and followed tutorial along fairly, " +
-					"take a unicorn :unicorn: as reward!\n" +
-					"Also, as bonus... look at the original interaction response :D",
+				msg = fmt.Sprintf(randomRedditPost[0].Data.Children[0].Data.Title) + " " + randomRedditPost[0].Data.Children[0].Data.URL
+			}
+			// Respond with the post's title and URL
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: msg,
+				},
 			})
 		},
 	}
@@ -383,4 +615,24 @@ func main() {
 	signal.Notify(stop, os.Interrupt)
 	<-stop
 	log.Println("Gracefully shutdowning")
+}
+
+// helper functions
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+
+	return false
+}
+
+func remove(s []string, r string) []string {
+	for i, v := range s {
+		if v == r {
+			return append(s[:i], s[i+1:]...)
+		}
+	}
+	return s
 }
