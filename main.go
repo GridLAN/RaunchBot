@@ -366,7 +366,7 @@ type Subreddit struct {
 	} `json:"data"`
 }
 
-var subreddits = []string{}
+var Subreddits = []string{}
 
 func getJson(url string, target interface{}) error {
 	// Create a new HTTP client with a timeout of 10 seconds
@@ -470,17 +470,17 @@ var (
 		"reddit": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var msg string
 			// If the []subreddits is empty, it will return an error
-			if len(subreddits) == 0 {
+			if len(Subreddits) == 0 {
 				msg = "There are no subreddits in the list to choose from."
 			} else {
 
 				// Seed the random number generator & get a random index from the slice
 				rand.Seed(time.Now().UnixNano())
-				randIndex := rand.Intn(len(subreddits))
+				randIndex := rand.Intn(len(Subreddits))
 
 				// Query the API for a random post from a random subreddit
 				randomRedditPost := RedditPost{}
-				getJson("https://reddit.com/r/"+subreddits[randIndex]+"/random.json", &randomRedditPost)
+				getJson("https://reddit.com/r/"+Subreddits[randIndex]+"/random.json", &randomRedditPost)
 
 				msg = fmt.Sprintf(randomRedditPost[0].Data.Children[0].Data.Title) + " " + randomRedditPost[0].Data.Children[0].Data.URL
 			}
@@ -506,7 +506,7 @@ var (
 			if subredditCheck.Data.URL == "" {
 				msg = "The subreddit " + subreddit + " was not found. Try again."
 			} else {
-				subreddits = append(subreddits, subreddit)
+				Subreddits = append(Subreddits, subreddit)
 				msg = subreddit + " has been added to the list."
 			}
 
@@ -520,7 +520,7 @@ var (
 
 		},
 		"reddit-list": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			msg := "The following subreddits are available:\n" + "```" + strings.Join(subreddits, "\n") + "```"
+			msg := "The following subreddits are available:\n" + "```" + strings.Join(Subreddits, "\n") + "```"
 
 			// Respond with the message
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -538,11 +538,11 @@ var (
 			var msg string
 
 			// If subreddit is not in []subreddits, return error
-			if !contains(subreddits, subreddit) {
+			if !contains(Subreddits, subreddit) {
 				msg = subreddit + " is not in the list."
 			} else {
 				// Remove subreddit from []subreddits
-				subreddits = remove(subreddits, subreddit)
+				Subreddits = remove(Subreddits, subreddit)
 				msg = subreddit + " has been removed from the list."
 			}
 
@@ -560,11 +560,11 @@ var (
 
 			var msg string
 			// If the []subreddits is empty, it will return an error
-			if len(subreddits) == 0 {
+			if len(Subreddits) == 0 {
 				msg = "There are no subreddits in the list to choose from."
 			}
 			// If subreddit is not in []subreddits, return error
-			if !contains(subreddits, subreddit) {
+			if !contains(Subreddits, subreddit) {
 				msg = subreddit + " is not in the list."
 			} else {
 
