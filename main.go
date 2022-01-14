@@ -419,11 +419,24 @@ var (
 	commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "reddit",
-			Description: "random post from a random subreddit",
+			Description: "random post from a random subreddit from a list",
 		},
 		{
 			Name:        "reddit-add",
-			Description: "add a subreddit to the list of available subreddits",
+			Description: "add a subreddit a list",
+			Options: []*discordgo.ApplicationCommandOption{
+
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "subreddit",
+					Description: "enter subreddit name",
+					Required:    true,
+				},
+			},
+		},
+		{
+			Name:        "reddit-remove",
+			Description: "remove a subreddit from a list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -436,21 +449,8 @@ var (
 		},
 		{
 			Name:        "reddit-list",
-			Description: "list of available subreddits",
+			Description: "lists of available subreddits",
 			Options:     []*discordgo.ApplicationCommandOption{},
-		},
-		{
-			Name:        "reddit-remove",
-			Description: "remove a subreddit to the list of available subreddits",
-			Options: []*discordgo.ApplicationCommandOption{
-
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "subreddit",
-					Description: "enter subreddit name",
-					Required:    true,
-				},
-			},
 		},
 		{
 			Name:        "subreddit",
@@ -471,7 +471,7 @@ var (
 			var msg string
 			// If the []subreddits is empty, it will return an error
 			if len(Subreddits) == 0 {
-				msg = "There are no subreddits in the list to choose from."
+				msg = "There are no subreddits on any list."
 			} else {
 
 				// Seed the random number generator & get a random index from the slice
@@ -520,7 +520,15 @@ var (
 
 		},
 		"reddit-list": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			msg := "The following subreddits are available:\n" + "```" + strings.Join(Subreddits, "\n") + "```"
+			// Setup the response data
+			var msg string
+
+			// If the []subreddits is empty, it will return an error
+			if len(Subreddits) == 0 {
+				msg = "There are no subreddits any list."
+			} else {
+				msg = "The following subreddits are available:\n" + "```" + strings.Join(Subreddits, "\n") + "```"
+			}
 
 			// Respond with the message
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -558,22 +566,23 @@ var (
 			// Query user for subreddit name
 			subreddit := i.ApplicationCommandData().Options[0].StringValue()
 
+			// Setup the response data
 			var msg string
-			// If the []subreddits is empty, it will return an error
-			if len(Subreddits) == 0 {
-				msg = "There are no subreddits in the list to choose from."
-			}
-			// If subreddit is not in []subreddits, return error
-			if !contains(Subreddits, subreddit) {
-				msg = subreddit + " is not in the list."
-			} else {
 
+			subredditCheck := Subreddit{}
+			getJson("https://reddit.com/r/"+subreddit+"/about.json", &subredditCheck)
+
+			// If the subreddit exists, get a random post from it
+			if subredditCheck.Data.URL == "" {
+				msg = "The subreddit " + subreddit + " was not found. Try again."
+			} else {
 				// Query the API for a random post from a random subreddit
 				randomRedditPost := RedditPost{}
 				getJson("https://reddit.com/r/"+subreddit+"/random.json", &randomRedditPost)
 
 				msg = fmt.Sprintf(randomRedditPost[0].Data.Children[0].Data.Title) + " " + randomRedditPost[0].Data.Children[0].Data.URL
 			}
+
 			// Respond with the post's title and URL
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
@@ -613,6 +622,7 @@ func main() {
 
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
+
 	<-stop
 	log.Println("Gracefully shutdowning")
 }
