@@ -366,6 +366,9 @@ type Subreddit struct {
 }
 
 var Subreddits = []string{}
+var Playlists = []string{}
+var SelectedPlaylist int = 0
+var PlaylistsOfSubreddits = [][]string{Playlists, Subreddits}
 
 func getJson(url string, target interface{}) error {
 	// Create a new HTTP client with a timeout of 10 seconds
@@ -417,12 +420,12 @@ func init() {
 var (
 	commands = []*discordgo.ApplicationCommand{
 		{
-			Name:        "reddit",
-			Description: "random post from a random subreddit from a list",
+			Name:        "random",
+			Description: "random post from a random subreddit in the list",
 		},
 		{
-			Name:        "reddit-add",
-			Description: "add a subreddit a list",
+			Name:        "add",
+			Description: "add a subreddit to the list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -434,8 +437,8 @@ var (
 			},
 		},
 		{
-			Name:        "reddit-remove",
-			Description: "remove a subreddit from a list",
+			Name:        "remove",
+			Description: "remove a subreddit from the list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -447,12 +450,12 @@ var (
 			},
 		},
 		{
-			Name:        "reddit-list",
-			Description: "lists of available subreddits",
+			Name:        "list",
+			Description: "lists of available subreddits in the list",
 			Options:     []*discordgo.ApplicationCommandOption{},
 		},
 		{
-			Name:        "subreddit",
+			Name:        "sub",
 			Description: "random post from a specific subreddit",
 			Options: []*discordgo.ApplicationCommandOption{
 
@@ -466,7 +469,7 @@ var (
 		},
 	}
 	commandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"reddit": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"random": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var msg string
 			// If the []subreddits is empty, it will return an error
 			if len(Subreddits) == 0 {
@@ -491,12 +494,17 @@ var (
 				},
 			})
 		},
-		"reddit-add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"add": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			// Query user for subreddit name
 			subreddit := i.ApplicationCommandData().Options[0].StringValue()
 
 			// Setup the response data
 			var msg string
+
+			// if the subreddit is already contained in the slice, do nothing
+			if contains(Subreddits, subreddit) {
+				msg = "The subreddit " + subreddit + " is already on the list."
+			}
 
 			subredditCheck := Subreddit{}
 			getJson("https://reddit.com/r/"+subreddit+"/about.json", &subredditCheck)
@@ -518,7 +526,7 @@ var (
 			})
 
 		},
-		"reddit-list": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"list": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			// Setup the response data
 			var msg string
 
@@ -537,7 +545,7 @@ var (
 				},
 			})
 		},
-		"reddit-remove": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"remove": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			// Query user for subreddit name
 			subreddit := i.ApplicationCommandData().Options[0].StringValue()
 
@@ -561,7 +569,7 @@ var (
 				},
 			})
 		},
-		"subreddit": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+		"sub": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			// Query user for subreddit name
 			subreddit := i.ApplicationCommandData().Options[0].StringValue()
 
@@ -621,9 +629,9 @@ func main() {
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
 	<-stop
-	
+
 	log.Println("Gracefully shutdowning; Cleaning up commands")
-	
+
 	for _, v := range commands {
 		s.ApplicationCommandDelete(s.State.User.ID, *GuildID, v.Name)
 	}
