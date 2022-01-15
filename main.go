@@ -529,7 +529,7 @@ var (
 			if len(Subreddits) == 0 {
 				msg = "There are no subreddits any list."
 			} else {
-				msg = "The following subreddits are available:\n" + "```" + strings.Join(Subreddits, "\n") + "```"
+				msg = "The following subreddits are available:\n" + "```\n" + strings.Join(Subreddits, "\n") + "\n```"
 			}
 
 			// Respond with the message
