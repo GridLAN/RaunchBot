@@ -43,7 +43,7 @@ type Subreddit struct {
 	} `json:"data"`
 }
 
-var Subreddits = []string{"news", "funny", "crazyfuckingvideos"}
+var Subreddits = []string{}
 
 func getJson(url string, target interface{}) error {
 	// Create a new HTTP client with a timeout of 10 seconds
