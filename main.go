@@ -161,9 +161,6 @@ var (
 				rand.Seed(time.Now().UnixNano())
 				randIndex := rand.Intn(len(Subreddits))
 
-				// print subreddit
-				fmt.Println(Subreddits[randIndex])
-
 				// Query the API for a random post from a random subreddit
 				randomRedditPost := RedditPost{}
 				getJson("https://reddit.com/r/"+Subreddits[randIndex]+"/random.json?obey_over18=true", &randomRedditPost)
