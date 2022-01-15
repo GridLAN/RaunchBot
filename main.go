@@ -28,8 +28,9 @@ type RedditPost []struct {
 		Children []struct {
 			Kind string `json:"kind"`
 			Data struct {
-				Title string `json:"title,omitempty"`
-				URL   string `json:"url,omitempty"`
+				Subreddit string `json:"subreddit"`
+				Title     string `json:"title,omitempty"`
+				URL       string `json:"url,omitempty"`
 			} `json:"data"`
 		} `json:"children"`
 	} `json:"data"`
@@ -42,7 +43,7 @@ type Subreddit struct {
 	} `json:"data"`
 }
 
-var Subreddits = []string{"news", "personalfinance", "funny", "crazyfuckingvideos"}
+var Subreddits = []string{"news", "funny", "crazyfuckingvideos"}
 
 func getJson(url string, target interface{}) error {
 	// Create a new HTTP client with a timeout of 10 seconds
@@ -160,10 +161,14 @@ var (
 				rand.Seed(time.Now().UnixNano())
 				randIndex := rand.Intn(len(Subreddits))
 
+				// print subreddit
+				fmt.Println(Subreddits[randIndex])
+
 				// Query the API for a random post from a random subreddit
 				randomRedditPost := RedditPost{}
 				getJson("https://reddit.com/r/"+Subreddits[randIndex]+"/random.json?obey_over18=true", &randomRedditPost)
-				msg = fmt.Sprintf(randomRedditPost[0].Data.Children[0].Data.Title) + " " + randomRedditPost[0].Data.Children[0].Data.URL
+
+				msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
 			}
 			// Respond with the post's title and URL
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
@@ -264,7 +269,7 @@ var (
 				randomRedditPost := RedditPost{}
 				getJson("https://reddit.com/r/"+subreddit+"/random.json", &randomRedditPost)
 
-				msg = fmt.Sprintf(randomRedditPost[0].Data.Children[0].Data.Title) + " " + randomRedditPost[0].Data.Children[0].Data.URL
+				msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
 			}
 
 			// Respond with the post's title and URL
