@@ -6,8 +6,9 @@ Get RedditBot in your discord [here](https://discord.com/api/oauth2/authorize?cl
 Bot Commands:
 ```
 /random - random post from random subreddit
-/add - add subreddit to a list
-/remove - remove subreddit from a list
+/list - show the list of subreddits
+/add - add subreddit to the list
+/remove - remove subreddit from the list
 /sub <subreddit> - random post from <subreddit>
 ```
 
