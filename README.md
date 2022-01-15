@@ -21,5 +21,5 @@ Bot Commands:
 2. Alternatively, build and run the project inside of a container.
 
     ```
-    docker build -t RedditBot . && docker run -d --pull always --env TOKEN='abc123' RedditBot
+    docker build -t redditbot . && docker run -d --env TOKEN='abc123' redditbot
     ```
