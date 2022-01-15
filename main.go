@@ -18,9 +18,8 @@ import (
 
 // Bot parameters
 var (
-	GuildID        = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
-	BotToken       = os.Getenv("TOKEN")
-	RemoveCommands = flag.Bool("rmcmd", true, "Remove all commands after shutdowning or not")
+	GuildID  = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
+	BotToken = os.Getenv("TOKEN")
 )
 
 type RedditPost []struct {
@@ -619,12 +618,15 @@ func main() {
 	}
 
 	defer s.Close()
-
 	stop := make(chan os.Signal)
 	signal.Notify(stop, os.Interrupt)
-
 	<-stop
-	log.Println("Gracefully shutdowning")
+	
+	log.Println("Gracefully shutdowning; Cleaning up commands")
+	
+	for _, v := range commands {
+		s.ApplicationCommandDelete(s.State.User.ID, *GuildID, v.Name)
+	}
 }
 
 // helper functions
