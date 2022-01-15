@@ -366,9 +366,6 @@ type Subreddit struct {
 }
 
 var Subreddits = []string{}
-var Playlists = []string{}
-var SelectedPlaylist int = 0
-var PlaylistsOfSubreddits = [][]string{Playlists, Subreddits}
 
 func getJson(url string, target interface{}) error {
 	// Create a new HTTP client with a timeout of 10 seconds
