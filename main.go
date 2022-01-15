@@ -18,7 +18,7 @@ import (
 
 // Bot parameters
 var (
-	GuildID  = flag.String("guild", "922157549631979570", "Test guild ID. If not passed - bot registers commands globally")
+	GuildID  = flag.String("guild", "", "Test guild ID. If not passed - bot registers commands globally")
 	BotToken = os.Getenv("TOKEN")
 )
 
