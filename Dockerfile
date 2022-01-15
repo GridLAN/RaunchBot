@@ -20,6 +20,9 @@ RUN go build main.go
 FROM alpine as certimage
 RUN apk add --no-cache ca-certificates
 
+# Use non-root user
+USER go
+
 # Minimal Prod Image
 FROM scratch
 
