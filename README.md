@@ -5,10 +5,10 @@ Get RanchBot in your discord [here](https://discord.com/api/oauth2/authorize?cli
 
 Bot Commands:
 ```
-/reddit - random post from random subreddit
-/reddit add - add subreddit to []subreddits{}
-/reddit remove - remove subreddit from []subreddits{}
-/subreddit <subreddit> - random post from <subreddit>
+/random - random post from random subreddit
+/add - add subreddit to a list
+/remove - remove subreddit from a list
+/sub <subreddit> - random post from <subreddit>
 ```
 
 ## Development:
