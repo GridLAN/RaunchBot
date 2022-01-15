@@ -504,19 +504,17 @@ var (
 			// if the subreddit is already contained in the slice, do nothing
 			if contains(Subreddits, subreddit) {
 				msg = "The subreddit " + subreddit + " is already on the list."
-			}
-
-			subredditCheck := Subreddit{}
-			getJson("https://reddit.com/r/"+subreddit+"/about.json", &subredditCheck)
-
-			// If the subreddit exists, add it to the slice
-			if subredditCheck.Data.URL == "" {
-				msg = "The subreddit " + subreddit + " was not found. Try again."
 			} else {
-				Subreddits = append(Subreddits, subreddit)
-				msg = subreddit + " has been added to the list."
+				subredditCheck := Subreddit{}
+				getJson("https://reddit.com/r/"+subreddit+"/about.json", &subredditCheck)
+				// If the subreddit exists, add it to the slice
+				if subredditCheck.Data.URL == "" {
+					msg = "The subreddit " + subreddit + " was not found. Try again."
+				} else {
+					Subreddits = append(Subreddits, subreddit)
+					msg = subreddit + " has been added to the list."
+				}
 			}
-
 			// Respond with the message
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
