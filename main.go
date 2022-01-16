@@ -75,7 +75,7 @@ func getJson(url string, target interface{}) error {
 	// Unmarshal the JSON response into the target interface
 	err = json.Unmarshal(b, &target)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error unmarshalling JSON: %v", err)
 	}
 
 	return json.Unmarshal(b, target)
@@ -265,7 +265,12 @@ var (
 				randomRedditPost := RedditPost{}
 				getJson("https://reddit.com/r/"+subreddit+"/random.json", &randomRedditPost)
 
-				msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
+				// if randomRedditPost is empty, return an error
+				if len(randomRedditPost) == 0 {
+					msg = "`r/" + subreddit + "`" + " is not a supported subreddit."
+				} else {
+					msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
+				}
 			}
 
 			// Respond with the post's title and URL
