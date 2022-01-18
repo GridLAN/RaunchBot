@@ -163,8 +163,12 @@ var (
 				// Query the API for a random post from a random subreddit
 				randomRedditPost := RedditPost{}
 				getJson("https://reddit.com/r/"+Subreddits[randIndex]+"/random.json?obey_over18=true", &randomRedditPost)
-
-				msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
+				// if randomRedditPost is empty, return an error
+				if len(randomRedditPost) == 0 {
+					msg = "`r/" + subreddit + "`" + " is not a supported subreddit."
+				} else {
+					msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
+				}
 			}
 			// Respond with the post's title and URL
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
