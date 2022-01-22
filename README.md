@@ -1,6 +1,4 @@
 # RedditBot
-RedditBot brings you the latest Raunchy content straight to your favorite Discord server. 
-
 Get RedditBot in your discord [here](https://discord.com/api/oauth2/authorize?client_id=931745853331374170&permissions=534723951680&scope=bot%20applications.commands).
 
 Bot Commands:
