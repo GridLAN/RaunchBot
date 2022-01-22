@@ -42,7 +42,7 @@ type Subreddit struct {
 	} `json:"data"`
 }
 
-// map of GuildID to a slice of subreddits
+// map of ChannelID to a slice of Subreddits
 var ChannelSubreddits = map[string][]string{}
 
 func getJson(url string, target interface{}) error {
