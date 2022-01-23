@@ -102,11 +102,11 @@ var (
 	commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "random",
-			Description: "random post from a random subreddit in the list",
+			Description: "random post from a random subreddit from the channel list",
 		},
 		{
 			Name:        "add",
-			Description: "add a subreddit to the list",
+			Description: "add a subreddit to the channel list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -119,7 +119,7 @@ var (
 		},
 		{
 			Name:        "remove",
-			Description: "remove a subreddit from the list",
+			Description: "remove a subreddit from the channel list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -132,7 +132,7 @@ var (
 		},
 		{
 			Name:        "list",
-			Description: "lists of available subreddits in the list",
+			Description: "lists of available subreddits in the channel list",
 			Options:     []*discordgo.ApplicationCommandOption{},
 		},
 		{
@@ -154,7 +154,7 @@ var (
 			var msg string
 			// If the []subreddits is empty, it will return an error
 			if len(ChannelSubreddits[i.ChannelID]) == 0 {
-				msg = "There are no subreddits on any list."
+				msg = "There are no subreddits in this channel's list."
 			} else {
 
 				// Seed the random number generator & get a random index from the slice
@@ -188,7 +188,7 @@ var (
 
 			// if the subreddit is already contained in the slice, do nothing
 			if contains(ChannelSubreddits[i.ChannelID], subreddit) {
-				msg = "The subreddit " + subreddit + " is already on the list."
+				msg = "The subreddit " + subreddit + " is already on this channel's list."
 			} else {
 				subredditCheck := Subreddit{}
 				getJson("https://reddit.com/r/"+subreddit+"/about.json", &subredditCheck)
@@ -197,7 +197,7 @@ var (
 					msg = "The subreddit " + subreddit + " was not found. Try again."
 				} else {
 					ChannelSubreddits[i.ChannelID] = append(ChannelSubreddits[i.ChannelID], subreddit)
-					msg = subreddit + " has been added to the list."
+					msg = subreddit + " has been added to the channel's list."
 				}
 			}
 			// Respond with the message
@@ -215,7 +215,7 @@ var (
 
 			// If the []subreddits is empty, it will return an error
 			if len(ChannelSubreddits[i.ChannelID]) == 0 {
-				msg = "There are no subreddits any list."
+				msg = "There are no subreddits on this channel's list."
 			} else {
 				msg = "The following subreddits are available:\n" + "```\n" + strings.Join(ChannelSubreddits[i.ChannelID], "\n") + "\n```"
 			}
@@ -237,11 +237,11 @@ var (
 
 			// If subreddit is not in []subreddits, return error
 			if !contains(ChannelSubreddits[i.ChannelID], subreddit) {
-				msg = subreddit + " is not in the list."
+				msg = subreddit + " is not on this channel's list."
 			} else {
 				// Remove subreddit from []subreddits
 				ChannelSubreddits[i.ChannelID] = remove(ChannelSubreddits[i.ChannelID], subreddit)
-				msg = subreddit + " has been removed from the list."
+				msg = subreddit + " has been removed from this channel's list."
 			}
 
 			// Respond with the message
