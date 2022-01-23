@@ -42,7 +42,8 @@ type Subreddit struct {
 	} `json:"data"`
 }
 
-var Subreddits = []string{}
+// map of ChannelID to a slice of Subreddits
+var ChannelSubreddits = map[string][]string{}
 
 func getJson(url string, target interface{}) error {
 	// Create a new HTTP client with a timeout of 10 seconds
@@ -152,20 +153,20 @@ var (
 		"random": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			var msg string
 			// If the []subreddits is empty, it will return an error
-			if len(Subreddits) == 0 {
+			if len(ChannelSubreddits[i.ChannelID]) == 0 {
 				msg = "There are no subreddits on any list."
 			} else {
 
 				// Seed the random number generator & get a random index from the slice
 				rand.Seed(time.Now().UnixNano())
-				randIndex := rand.Intn(len(Subreddits))
+				randIndex := rand.Intn(len(ChannelSubreddits[i.ChannelID]))
 
 				// Query the API for a random post from a random subreddit
 				randomRedditPost := RedditPost{}
-				getJson("https://reddit.com/r/"+Subreddits[randIndex]+"/random.json?obey_over18=true", &randomRedditPost)
+				getJson("https://reddit.com/r/"+ChannelSubreddits[i.ChannelID][randIndex]+"/random.json", &randomRedditPost)
 				// if randomRedditPost is empty, return an error
 				if len(randomRedditPost) == 0 {
-					msg = "`r/" + Subreddits[randIndex] + "`" + " is not a supported subreddit."
+					msg = "`r/" + ChannelSubreddits[i.ChannelID][randIndex] + "`" + " is not a supported subreddit."
 				} else {
 					msg = randomRedditPost[0].Data.Children[0].Data.Title + "\n`r/" + randomRedditPost[0].Data.Children[0].Data.Subreddit + "`\n" + randomRedditPost[0].Data.Children[0].Data.URL
 				}
@@ -186,7 +187,7 @@ var (
 			var msg string
 
 			// if the subreddit is already contained in the slice, do nothing
-			if contains(Subreddits, subreddit) {
+			if contains(ChannelSubreddits[i.ChannelID], subreddit) {
 				msg = "The subreddit " + subreddit + " is already on the list."
 			} else {
 				subredditCheck := Subreddit{}
@@ -195,7 +196,7 @@ var (
 				if subredditCheck.Data.URL == "" {
 					msg = "The subreddit " + subreddit + " was not found. Try again."
 				} else {
-					Subreddits = append(Subreddits, subreddit)
+					ChannelSubreddits[i.ChannelID] = append(ChannelSubreddits[i.ChannelID], subreddit)
 					msg = subreddit + " has been added to the list."
 				}
 			}
@@ -213,10 +214,10 @@ var (
 			var msg string
 
 			// If the []subreddits is empty, it will return an error
-			if len(Subreddits) == 0 {
+			if len(ChannelSubreddits[i.ChannelID]) == 0 {
 				msg = "There are no subreddits any list."
 			} else {
-				msg = "The following subreddits are available:\n" + "```\n" + strings.Join(Subreddits, "\n") + "\n```"
+				msg = "The following subreddits are available:\n" + "```\n" + strings.Join(ChannelSubreddits[i.ChannelID], "\n") + "\n```"
 			}
 
 			// Respond with the message
@@ -235,11 +236,11 @@ var (
 			var msg string
 
 			// If subreddit is not in []subreddits, return error
-			if !contains(Subreddits, subreddit) {
+			if !contains(ChannelSubreddits[i.ChannelID], subreddit) {
 				msg = subreddit + " is not in the list."
 			} else {
 				// Remove subreddit from []subreddits
-				Subreddits = remove(Subreddits, subreddit)
+				ChannelSubreddits[i.ChannelID] = remove(ChannelSubreddits[i.ChannelID], subreddit)
 				msg = subreddit + " has been removed from the list."
 			}
 
