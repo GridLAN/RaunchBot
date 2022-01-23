@@ -102,11 +102,11 @@ var (
 	commands = []*discordgo.ApplicationCommand{
 		{
 			Name:        "random",
-			Description: "random post from a random subreddit from the channel list",
+			Description: "random post from a random subreddit from this channel's list",
 		},
 		{
 			Name:        "add",
-			Description: "add a subreddit to the channel list",
+			Description: "add a subreddit to this channel's list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -119,7 +119,7 @@ var (
 		},
 		{
 			Name:        "remove",
-			Description: "remove a subreddit from the channel list",
+			Description: "remove a subreddit from this channel's list",
 			Options: []*discordgo.ApplicationCommandOption{
 
 				{
@@ -132,7 +132,7 @@ var (
 		},
 		{
 			Name:        "list",
-			Description: "lists of available subreddits in the channel list",
+			Description: "lists of available subreddits in this channel's list",
 			Options:     []*discordgo.ApplicationCommandOption{},
 		},
 		{
