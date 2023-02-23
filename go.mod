@@ -2,7 +2,7 @@ module raunchbot
 
 go 1.17
 
-require github.com/bwmarrin/discordgo v0.23.3-0.20211204170245-092735083ddf
+require github.com/bwmarrin/discordgo v0.27.0
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
